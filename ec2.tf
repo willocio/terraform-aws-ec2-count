@@ -8,13 +8,23 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "ubuntu" {
+  for_each = {
+    docker = {
+      name = "docker"
+      type = "t2.micro"
+
+    }
+    prometheus = {
+      name = "prometheus"
+      type = "t2.micro"
+    }
+  }
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
+  instance_type = lookup(each.value, "type", null)
   key_name      = aws_key_pair.my-key.id
-  count         = 2
 
   tags = {
-    Name = "Ubuntu ${count.index}"
+    Name = "${each.key}"
   }
 }
 
